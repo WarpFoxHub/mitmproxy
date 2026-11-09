@@ -84,7 +84,16 @@ def _rdumpq(q: collections.deque, size: int, value: TSerializable) -> int:
     strings, especially on deeply nested structures.
     """
     write = q.appendleft
-    if value is None:
+    if isinstance(value, str):
+        data = value.encode("utf8")
+        ldata = len(data)
+        span = str(ldata).encode()
+        write(b";")
+        write(data)
+        write(b":")
+        write(span)
+        return size + 2 + len(span) + ldata
+    elif value is None:
         write(b"0:~")
         return size + 3
     elif value is True:
@@ -114,15 +123,6 @@ def _rdumpq(q: collections.deque, size: int, value: TSerializable) -> int:
         ldata = len(data)
         span = str(ldata).encode()
         write(b",")
-        write(data)
-        write(b":")
-        write(span)
-        return size + 2 + len(span) + ldata
-    elif isinstance(value, str):
-        data = value.encode("utf8")
-        ldata = len(data)
-        span = str(ldata).encode()
-        write(b";")
         write(data)
         write(b":")
         write(span)
